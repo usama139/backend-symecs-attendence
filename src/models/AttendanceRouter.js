@@ -32,8 +32,13 @@ const getModelForDate = (dateString) => {
 
 // Distributed global query tool (Fetches from both clusters and fuses arrays seamlessly)
 const globalFind = async (query = {}) => {
+    const defaultModels = mongoose.connection.models;
+    
     const p1 = AttendanceMaster.find(query).populate('classId teacherId').populate('records.studentId');
-    const p2 = AttendanceArchive.find(query).populate('classId teacherId').populate('records.studentId');
+    const p2 = AttendanceArchive.find(query)
+        .populate({ path: 'classId', model: defaultModels.Class })
+        .populate({ path: 'teacherId', model: defaultModels.User })
+        .populate({ path: 'records.studentId', model: defaultModels.User });
     
     const [res1, res2] = await Promise.all([p1, p2]);
     return [...res1, ...res2]; // Return fused stream

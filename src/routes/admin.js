@@ -15,6 +15,8 @@ router.delete('/teachers/:id', adminController.removeTeacher);
 
 router.post('/students', adminController.addStudent);
 router.get('/students', adminController.getStudents);
+router.put('/students/:id', adminController.updateStudent);
+router.delete('/students/:id', adminController.removeStudent);
 
 router.get('/attendance', adminController.getAllAttendance);
 router.get('/archive-attendance', adminController.archiveOldAttendance);
