@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const AttendanceRouter = require('../models/AttendanceRouter');
 const Class = require('../models/Class');
+const DITRegistration = require('../models/DITRegistration');
 const bcrypt = require('bcryptjs');
 
 // --- Classes ---
@@ -212,5 +213,16 @@ exports.archiveOldAttendance = async (req, res) => {
     } catch (err) {
         console.error("Archive Error:", err);
         res.status(500).send('Archive Server Error');
+    }
+};
+
+// --- DIT Registrations ---
+exports.getDITRegistrations = async (req, res) => {
+    try {
+        const registrations = await DITRegistration.find().sort({ createdAt: -1 });
+        res.json(registrations);
+    } catch (err) {
+        console.error("Get DIT Registrations Error:", err);
+        res.status(500).send('Server Error');
     }
 };

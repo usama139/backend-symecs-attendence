@@ -21,4 +21,6 @@ router.delete('/students/:id', adminController.removeStudent);
 router.get('/attendance', adminController.getAllAttendance);
 router.get('/archive-attendance', adminController.archiveOldAttendance);
 
+router.get('/dit-registrations', adminController.getDITRegistrations);
+
 module.exports = router;

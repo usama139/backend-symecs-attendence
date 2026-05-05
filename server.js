@@ -28,6 +28,7 @@ app.get('/', (req, res) => res.send('API Running'));
 app.use('/api/auth', require('./src/routes/auth'));
 app.use('/api/admin', require('./src/routes/admin'));
 app.use('/api/teacher', require('./src/routes/teacher'));
+app.use('/api/registration', require('./src/routes/registration'));
 
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
