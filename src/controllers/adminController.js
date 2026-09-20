@@ -124,7 +124,7 @@ exports.updateStudent = async (req, res) => {
         
         user.name = name || user.name;
         user.email = email || user.email;
-        user.assignedClass = assignedClass || user.assignedClass;
+        user.assignedClass = assignedClass !== undefined ? assignedClass : user.assignedClass;
         
         if (password) {
             const salt = await bcrypt.genSalt(10);
@@ -173,26 +173,46 @@ exports.getAllAttendance = async (req, res) => {
     }
 };
 
+// Clear Attendance History by selected class or all classes
+exports.clearAttendanceByClass = async (req, res) => {
+    const { classId } = req.body;
+    try {
+        const docs = await AttendanceRouter.globalFind();
+        let targetDocs = docs;
+        
+        if (classId) {
+            targetDocs = docs.filter(d => (d.classId?._id || d.classId)?.toString() === classId.toString());
+        }
+
+        if (targetDocs.length === 0) {
+            return res.status(404).json({ msg: 'No attendance records found for deletion.' });
+        }
+
+        const idsToDelete = targetDocs.map(d => d._id);
+        await AttendanceRouter.executeGlobalDelete(idsToDelete);
+
+        res.json({ msg: `Successfully cleared attendance history for the selected class!` });
+    } catch (err) {
+        console.error("Clear Attendance Error:", err);
+        res.status(500).send('Server Error');
+    }
+};
+
 exports.archiveOldAttendance = async (req, res) => {
     try {
-        const currentMonth = new Date().toISOString().slice(0, 7); // e.g., "2026-04"
-        
-        // Find all records
+        const currentMonth = new Date().toISOString().slice(0, 7);
         const docs = await AttendanceRouter.globalFind();
-        
-        // Filter those older than the current month
         const oldDocs = docs.filter(d => d.date.slice(0, 7) !== currentMonth);
         
         if (oldDocs.length === 0) {
             return res.status(404).json({ msg: "Your server has no old monthly records to archive at this time!" });
         }
 
-        // Build CSV Data structure
         let csvString = "Date,Class Name,Teacher Name,Student Email/ID,Student Name,Status\n";
         let oldDocIds = [];
 
         oldDocs.forEach(session => {
-            oldDocIds.push(session._id); // Stack for deletion action
+            oldDocIds.push(session._id);
             session.records.forEach(r => {
                 const className = session.classId?.name || 'Deleted Class';
                 const teacherName = session.teacherId?.name || 'Deleted Teacher';
@@ -202,10 +222,8 @@ exports.archiveOldAttendance = async (req, res) => {
             });
         });
 
-        // Nuke old data automatically across all clusters!
         await AttendanceRouter.executeGlobalDelete(oldDocIds);
 
-        // Stream the literal CSV data payload securely back to frontend for local download
         res.header('Content-Type', 'text/csv');
         res.attachment(`Symecs_Attendance_Archive_Before_${currentMonth}.csv`);
         return res.send(csvString);
@@ -223,6 +241,16 @@ exports.getDITRegistrations = async (req, res) => {
         res.json(registrations);
     } catch (err) {
         console.error("Get DIT Registrations Error:", err);
+        res.status(500).send('Server Error');
+    }
+};
+
+exports.removeDITRegistration = async (req, res) => {
+    try {
+        await DITRegistration.findByIdAndDelete(req.params.id);
+        res.json({ msg: 'Application deleted successfully' });
+    } catch (err) {
+        console.error("Delete DIT Registration Error:", err);
         res.status(500).send('Server Error');
     }
 };

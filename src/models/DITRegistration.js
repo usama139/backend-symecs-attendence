@@ -21,6 +21,18 @@ const ditRegistrationSchema = new mongoose.Schema({
         type: String,
         default: '36',
     },
+    course: {
+        type: String,
+        default: 'DIT (Diploma in Information Technology) - 1 Year',
+    },
+    email: {
+        type: String,
+        default: '',
+    },
+    dob: {
+        type: String,
+        default: '',
+    },
     createdAt: {
         type: Date,
         default: Date.now,

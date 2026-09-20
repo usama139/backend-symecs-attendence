@@ -19,8 +19,10 @@ router.put('/students/:id', adminController.updateStudent);
 router.delete('/students/:id', adminController.removeStudent);
 
 router.get('/attendance', adminController.getAllAttendance);
+router.post('/clear-attendance', adminController.clearAttendanceByClass);
 router.get('/archive-attendance', adminController.archiveOldAttendance);
 
 router.get('/dit-registrations', adminController.getDITRegistrations);
+router.delete('/dit-registrations/:id', adminController.removeDITRegistration);
 
 module.exports = router;

@@ -5,17 +5,20 @@ const DITRegistration = require('../models/DITRegistration');
 // @access  Public
 exports.registerDIT = async (req, res) => {
     try {
-        const { name, fatherName, contactNumber, address } = req.body;
+        const { name, fatherName, contactNumber, address, course, email, dob } = req.body;
 
-        if (!name || !fatherName || !contactNumber || !address) {
-            return res.status(400).json({ msg: 'Please enter all fields' });
+        if (!name || !fatherName || !contactNumber) {
+            return res.status(400).json({ msg: 'Please enter required fields (Name, Father Name, Contact Number)' });
         }
 
         const newRegistration = new DITRegistration({
             name,
             fatherName,
             contactNumber,
-            address
+            address: address || 'Mirpurkhas',
+            course: course || 'DIT (Diploma in Information Technology) - 1 Year',
+            email: email || '',
+            dob: dob || ''
         });
 
         await newRegistration.save();
