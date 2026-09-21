@@ -7,6 +7,8 @@ router.use(protect, adminOnly);
 
 router.post('/classes', adminController.addClass);
 router.get('/classes', adminController.getClasses);
+router.put('/classes/:id', adminController.updateClass);
+router.delete('/classes/:id', adminController.removeClass);
 
 router.post('/teachers', adminController.addTeacher);
 router.get('/teachers', adminController.getTeachers);

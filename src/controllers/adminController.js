@@ -34,6 +34,33 @@ exports.getClasses = async (req, res) => {
     }
 };
 
+exports.updateClass = async (req, res) => {
+    const { name, timing } = req.body;
+    try {
+        let cls = await Class.findById(req.params.id);
+        if (!cls) return res.status(404).json({ msg: 'Class not found' });
+
+        cls.name = name || cls.name;
+        cls.timing = timing || cls.timing;
+
+        await cls.save();
+        res.json({ msg: 'Class updated successfully' });
+    } catch (err) {
+        res.status(500).send('Server Error');
+    }
+};
+
+exports.removeClass = async (req, res) => {
+    try {
+        await Class.findByIdAndDelete(req.params.id);
+        await User.updateMany({ assignedClass: req.params.id }, { $unset: { assignedClass: "" } });
+        await User.updateMany({ assignedClasses: req.params.id }, { $pull: { assignedClasses: req.params.id } });
+        res.json({ msg: 'Class removed successfully' });
+    } catch (err) {
+        res.status(500).send('Server Error');
+    }
+};
+
 // --- Teachers ---
 exports.addTeacher = async (req, res) => {
     const { name, email, password, assignedClasses } = req.body;
@@ -92,12 +119,12 @@ exports.removeTeacher = async (req, res) => {
 
 // --- Students ---
 exports.addStudent = async (req, res) => {
-    const { name, email, password, assignedClass } = req.body;
+    const { name, fatherName, email, password, assignedClass } = req.body;
     try {
         let user = await User.findOne({ email });
         if (user) return res.status(400).json({ msg: 'User already exists' });
         
-        user = new User({ name, email, password, role: 'Student', assignedClass });
+        user = new User({ name, fatherName, email, password, role: 'Student', assignedClass });
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(password, salt);
         await user.save();
@@ -117,12 +144,13 @@ exports.getStudents = async (req, res) => {
 };
 
 exports.updateStudent = async (req, res) => {
-    const { name, email, password, assignedClass } = req.body;
+    const { name, fatherName, email, password, assignedClass } = req.body;
     try {
         let user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ msg: 'User not found' });
         
         user.name = name || user.name;
+        user.fatherName = fatherName !== undefined ? fatherName : user.fatherName;
         user.email = email || user.email;
         user.assignedClass = assignedClass !== undefined ? assignedClass : user.assignedClass;
         
