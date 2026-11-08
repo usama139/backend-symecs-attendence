@@ -33,3 +33,5 @@ app.use('/api/registration', require('./src/routes/registration'));
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+module.exports = app;
